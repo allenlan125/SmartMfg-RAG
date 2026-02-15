@@ -1,0 +1,40 @@
+# --- Web 框架 (Stable) ---
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+python-multipart
+httpx>=0.27.0
+
+# --- 数据验证 (Stable Pydantic v2) ---
+pydantic>=2.7.0
+python-dotenv>=1.0.0
+
+# --- RAG 核心组件 (Stable) ---
+# Chroma 0.5+ 完美支持 Pydantic v2
+chromadb>=0.5.0
+# Sentence Transformers 稳定版
+sentence-transformers>=2.7.0
+# OpenAI SDK v1 是目前标准
+openai>=1.30.0
+rank_bm25
+jieba
+
+# --- LangChain 生态 (模块化安装) ---
+# 不再安装巨大的 langchain 包，只装需要的
+langchain-core>=0.2.0
+langchain-community>=0.2.0
+langchain-text-splitters>=0.2.0
+
+# --- 文档解析 (ETL) ---
+pdfplumber>=0.11.0
+python-docx
+pdf2image
+
+# --- OCR 引擎 (版本敏感区) ---
+# Paddle 目前在 ARM64/Linux 下对 Numpy 2.x 支持极差，必须锁死 1.x
+numpy<2.0.0
+paddlepaddle==2.6.2
+#环境安装了 PaddlePaddle 2.6.2 (目前的 Stable 稳定版)，但paddleocr>=2.7.0导致 pip 拉取了 PaddleOCR v2.8 或 v2.9 (最新版)。
+#新版 PaddleOCR 的代码中调用了 set_optimization_level 方法，这是 PaddlePaddle 3.0 (Beta) 才有的新特性。旧底座 (2.6.2) 无法承载新上层应用 (OCR Latest)，导致 AttributeError
+#paddleocr>=2.7.0
+paddleocr==2.7.3
+opencv-python-headless

@@ -1,0 +1,39 @@
+# 使用官方轻量级 Python 3.10 镜像
+# FROM python:3.10-slim
+# 1. 基础镜像：明确锁定使用 Debian 12 (Bookworm) 稳定版，避免使用 Trixie (Testing)
+FROM docker.m.daocloud.io/library/python:3.10-slim-bookworm
+
+# 1. 设置工作目录
+WORKDIR /app
+
+# =========== 👇 新增/修改这部分 👇 ===========
+# 1. 替换系统源为清华源 (针对 Debian Bookworm)，否则中间要访问外网
+# 这一步至关重要，能把 4000秒 缩短到 40秒
+# RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list.d/debian.sources && \
+#     sed -i 's/security.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list.d/debian.sources
+
+# 2. 安装系统级依赖 (OpenCV, PaddleOCR, PDF处理必需)
+# libgl1/libglib2.0 -> OpenCV
+# poppler-utils -> pdf2image
+# libgomp1 -> PaddlePaddle 多线程
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    poppler-utils \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# 3. 复制依赖清单并安装
+# 使用清华源加速下载
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 4. 复制业务代码
+COPY app ./app
+COPY .env .
+
+# 5. 暴露端口
+EXPOSE 8000
+
+# 6. 启动命令 (生产模式)
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

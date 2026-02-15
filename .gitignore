@@ -1,0 +1,27 @@
+# --- 1. 屏蔽敏感信息 (绝对不能传) ---
+.env
+.DS_Store
+*.key
+secrets.py
+
+# --- 2. 屏蔽大文件与模型 (让用户自己下载) ---
+model_cache/
+data/
+chroma_db/
+my_knowledge_base/
+*.pdf
+*.docx
+*.tar
+*.gz
+
+# --- 3. 屏蔽系统垃圾与缓存 ---
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+
+# --- 4. 屏蔽虚拟环境 ---
+venv/
+env/
+ai_lab/
+ai_rag_prod/

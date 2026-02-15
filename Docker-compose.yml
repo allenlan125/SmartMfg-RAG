@@ -1,0 +1,44 @@
+# version: '3.8'
+
+services:
+  # === 后端服务 ===
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: rag_backend_prod
+    environment:
+      - TZ=Asia/Shanghai
+      # 显式指向容器内的路径
+      - MODEL_PATH=/app/model_cache/bge-m3
+      - RERANKER_PATH=/app/model_cache/bge-reranker-m3
+      - DB_PATH=/app/data/chroma_db
+    volumes:
+      # 1. 挂载本地模型目录 -> 容器内
+      - ./model_cache:/app/model_cache
+      # 2. 挂载本地数据目录 (保证重启不丢失数据)
+      - ./data:/app/data
+      # 3. [关键] 挂载你刚才下载的 PaddleOCR 模型缓存
+      # 将宿主机的 ~/.paddleocr 映射给容器内的 /root/.paddleocr
+      - ~/.paddleocr:/root/.paddleocr
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        limits:
+          memory: 8G  # 限制内存防止撑爆机器
+
+  # === 前端服务 ===
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: rag_frontend_prod
+    environment:
+      - TZ=Asia/Shanghai
+      # 这里 backend 指向上面的 service name，Docker 会自动解析 DNS
+      - BACKEND_URL=http://backend:8000
+    ports:
+      - "8501:8501"
+    depends_on:
+      - backend  # 等后端启动了再启动前端

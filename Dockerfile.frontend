@@ -1,0 +1,19 @@
+# 同样基于 Python 3.10
+# FROM python:3.10-slim
+# 1. 基础镜像：明确锁定使用 Debian 12 (Bookworm) 稳定版，避免使用 Trixie (Testing)
+FROM docker.m.daocloud.io/library/python:3.10-slim-bookworm
+
+WORKDIR /app
+
+# 1. 只安装前端需要的轻量库
+RUN pip install --no-cache-dir streamlit requests -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+# 2. 复制前端代码
+COPY frontend ./frontend
+
+# 3. 暴露端口
+EXPOSE 8501
+
+# 4. 启动命令
+# --server.address=0.0.0.0 允许外部访问
+CMD ["streamlit", "run", "frontend/ui.py", "--server.port=8501", "--server.address=0.0.0.0"]
